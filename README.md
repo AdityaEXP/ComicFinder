@@ -12,6 +12,8 @@ Ideal for fans who want personalized recommendations using semantic search inste
 ## 💻 Live Demo Of Comic Finder
 **https://comicfinder.streamlit.app/**
 
+---
+
 ## 🚀 Features Of Comic Finder
 
 - 🔍 Recommends similar manga/manhwa/manhua/webtoon based on descriptions or titles
