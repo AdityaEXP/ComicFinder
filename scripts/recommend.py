@@ -5,11 +5,15 @@ import ast
 import re
 from sklearn.metrics.pairwise import cosine_similarity
 import os, dotenv
-# Load environment variables
-dotenv.load_dotenv()
 
-# ========== CONFIG ==========
-OPENAI_API_KEY = os.getenv("OPENAIKEY")  # Replace with your actual key or use environment variable
+# Load environment variables
+try:
+    dotenv.load_dotenv()
+    openai.api_key = os.getenv("OPENAIKEY")
+except:
+    import streamlit as st
+    openai.api_key = st.secrets["OPENAIKEY"]
+    
 EMBEDDING_MODEL = "text-embedding-3-small"
 DATA_PATH = "data/clean_data.csv"
 EMBEDDINGS_PATH = "data/clean_embeddings.npy"
