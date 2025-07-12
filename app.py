@@ -4,7 +4,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 import openai, requests
 from PIL import Image
 from io import BytesIO
-import os, dotenv
+import os, dotenv, gdown
+
+# downloading embeddings npy file
+file_path = "data/clean_embeddings.npy"
+if not os.path.exists(file_path):
+    print("Downloading clean_embeddings.npy...")
+    url = "https://drive.google.com/uc?id=1toZRablb8yCVhFrICdU1jQtmYh20mZ9P"
+    gdown.download(url, file_path, quiet=False)
 
 # Load environment variables
 dotenv.load_dotenv()
