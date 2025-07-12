@@ -24,8 +24,8 @@ def get_openai_embeddings(texts, model="text-embedding-3-small"):
     return np.array(all_embeddings)
 
 import pandas as pd
-df = pd.read_csv("clean_data.csv")
+df = pd.read_csv("data/clean_data.csv")
 texts = df["combined"].tolist()
 
 embeddings = get_openai_embeddings(texts)
-np.save("clean_embeddings.npy", embeddings)
+np.save("data/clean_embeddings.npy", embeddings)
