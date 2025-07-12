@@ -2,9 +2,13 @@
 
 A smart, content-based recommendation system for manga, powered by embeddings and Python.
 
+
 ![ComicFinder Preview](asset/img.jpg)
 
 ---
+
+## 💻 Live Demo 
+**https://comicfinder.streamlit.app/**
 
 ## 🚀 Features
 
