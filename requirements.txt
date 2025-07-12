@@ -6,3 +6,4 @@ scikit-learn
 Pillow
 requests
 python-dotenv
+gdown
