@@ -1,16 +1,18 @@
 # 🧠 ComicFinder
 
-A smart, content-based recommendation system for manga, powered by embeddings and Python.
+ComicFinder is an AI-powered content-based recommendation system built using Python and OpenAI Embeddings. 
+It helps users discover similar manga, manhwa, manhua, and webtoons based on descriptions, tags, or titles. 
+Ideal for fans who want personalized recommendations using semantic search instead of basic filters.
 
 
 ![ComicFinder Preview](asset/img.jpg)
 
 ---
 
-## 💻 Live Demo 
+## 💻 Live Demo Of Comic Finder
 **https://comicfinder.streamlit.app/**
 
-## 🚀 Features
+## 🚀 Features Of Comic Finder
 
 - 🔍 Recommends similar manga/manhwa/manhua/webtoon based on descriptions or titles
 - 📦 Utilizes precomputed `clean_embeddings.npy` for fast results
@@ -41,7 +43,7 @@ comic-recommender/
 
 ---
 
-# ⚙️ Installation
+# 🔧 How to Install and Run ComicFinder Locally
 ```
 git clone https://github.com/AdityaEXP/ComicFinder.git
 cd ComicFinder
@@ -53,6 +55,15 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 streamlit run .\app.py
 ```
+
+---
+## 📌 Example Use Cases
+- Find romance manhwa similar to *What's Wrong with Secretary Kim?*
+- Get fantasy webtoon recommendations with strong male leads
+- Discover hidden manga gems with character development arcs
+- Replace genre filters with AI-powered natural language queries
+
+---
 
 # 📥 Download Embedding File
 Since clean_embeddings.npy is large, it’s not included in this repo.
@@ -80,7 +91,7 @@ Aditya
 
 ---
 
-## 📚 Dataset Source
+## 📚 Dataset Source and Preprocessing
 This project uses data inspired by or adapted from the following Kaggle dataset:
 
 **📊 [Kaggle - Manhwa and Webtoon Dataset](https://www.kaggle.com/datasets/victorsoeiro/manga-manhwa-and-manhua-dataset/data)**  
