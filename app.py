@@ -35,7 +35,7 @@ st.title("🎯 Manhwa Recommender")
 
 desc = st.text_area("📝 Enter description (do not include tags)", placeholder="e.g. 'mc grows strong with magic'")
 tags = st.text_input("🏷️ Tags (comma-separated)", value="romance, action")
-top_k = st.selectbox("📌 Number of recommendations", options=[3, 5, 10, 15, 20], index=2)
+top_k = st.selectbox("📌 Number of recommendations", options=[3, 5, 10, 15, 20, 40, 60], index=2)
 ignore_nan_ratings = st.checkbox("🚫 Exclude manhwa with unknown ratings", value=True)
 
 # Year range slider
