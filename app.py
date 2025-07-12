@@ -79,7 +79,7 @@ if st.button("🔍 Recommend"):
     for _, row in results.iterrows():
         st.subheader(f"{row['title']} ({row['rating']}/5)" if pd.notna(row['rating']) else f"{row['title']} (Unrated)")
         st.caption(f"Genres: {', '.join(row['tags'])}")
-        st.write(f"{row['description'][:200]}...")
+        st.write(f"{row['description']}...")
 
         image_url = row['cover']
         try:
