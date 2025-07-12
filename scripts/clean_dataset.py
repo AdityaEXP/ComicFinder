@@ -1,6 +1,6 @@
 import pandas as pd, ast, re
 
-df = pd.read_csv("data.csv")
+df = pd.read_csv("data/data.csv")
 df.dropna(subset=['description', 'tags'], inplace=True)
 df = df[~df['description'].str.contains("no description", case=False)]
 df = df[~df['description'].str.contains("this entry currently", case=False)]
@@ -23,4 +23,4 @@ df['description'] = df['description'].apply(clean_text)
 # Optionally combine tags into description for richer input
 df['combined'] = df.apply(lambda row: f"Tags: {', '.join(row['tags'])}. Description: {row['description']}", axis=1)
 
-df.to_csv("clean_data.csv", index=False)
+df.to_csv("data/clean_data.csv", index=False)
