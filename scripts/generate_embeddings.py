@@ -2,8 +2,13 @@ import openai, numpy as np, time, math
 import os, dotenv
 
 # Load environment variables
-dotenv.load_dotenv()
-openai.api_key = os.getenv("OPENAIKEY")  # Secure your key
+try:
+    dotenv.load_dotenv()
+    openai.api_key = os.getenv("OPENAIKEY")
+except:
+    import streamlit as st
+    openai.api_key = st.secrets["OPENAIKEY"]
+    
 
 def get_openai_embeddings(texts, model="text-embedding-3-small"):
     all_embeddings = []
