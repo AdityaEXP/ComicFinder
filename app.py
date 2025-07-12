@@ -14,9 +14,13 @@ if not os.path.exists(file_path):
     gdown.download(url, file_path, quiet=False)
 
 # Load environment variables
-dotenv.load_dotenv()
-openai.api_key = os.getenv("OPENAIKEY")
-
+try:
+    dotenv.load_dotenv()
+    openai.api_key = os.getenv("OPENAIKEY")
+except:
+    import streamlit as st
+    openai.api_key = st.secrets["OPENAIKEY"]
+    
 # Load data
 df = pd.read_csv("data/clean_data.csv")
 df['tags'] = df['tags'].apply(ast.literal_eval)
