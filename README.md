@@ -1,11 +1,9 @@
 # 🧠 ComicFinder
 
 ComicFinder is an AI-powered content-based recommendation system built using Python and OpenAI Embeddings. 
-It helps users discover similar manga, manhwa, manhua, and webtoons based on descriptions, tags, or titles. 
-Ideal for fans who want personalized recommendations using semantic search instead of basic filters.
+It helps users discover semantically similar manga, manhwa, manhua, and webtoons based on natural language descriptions, genres, or titles — ideal for fans seeking personalized recommendations beyond keyword search.
 
-
-![ComicFinder Preview](asset/img.jpg)
+![ComicFinder Preview: Streamlit interface for manga recommendation](asset/img.jpg)
 
 ---
 
