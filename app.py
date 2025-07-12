@@ -31,7 +31,7 @@ def clean_text(text):
     return re.sub(r"[^\w\s]", "", text.lower())
 
 # --- UI ---
-st.title("🎯 Manhwa Recommender")
+st.title("🎯 Comic Recommender")
 
 desc = st.text_area("📝 Enter description (do not include tags)", placeholder="e.g. 'mc grows strong with magic'")
 tags = st.text_input("🏷️ Tags (comma-separated)", value="romance, action")
