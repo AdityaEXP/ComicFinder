@@ -20,7 +20,7 @@ def clean_text(text):
 
 df['description'] = df['description'].apply(clean_text)
 
-# Optionally combine tags into description for richer input
+# Creating new feature for better search
 df['combined'] = df.apply(lambda row: f"Tags: {', '.join(row['tags'])}. Description: {row['description']}", axis=1)
 
 df.to_csv("data/clean_data.csv", index=False)
