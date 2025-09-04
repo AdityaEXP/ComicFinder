@@ -91,16 +91,18 @@ Aditya
 
 ---
 
-## 📚 Dataset Source and Preprocessing
-This project uses data inspired by or adapted from the following Kaggle dataset:
-
-**📊 [Kaggle - Manhwa and Webtoon Dataset](https://www.kaggle.com/datasets/victorsoeiro/manga-manhwa-and-manhua-dataset/data)**  
-Credit to **Victor Soeiro** for compiling and sharing this dataset.
-
----
-
 ## 🔮 Future Plans
 1. Replace cosine similarity by FAISS for fast searches
 2. Adding Anime and webseries dataset as well
 3. Create a automated source for scrapping data from webpages or api and update the dataset periodically.
 4. Improve searching by creating high value embeddings using more data etc.
+
+
+
+---
+
+## 📚 Dataset Source and Preprocessing
+This project uses data inspired by or adapted from the following Kaggle dataset:
+
+**📊 [Kaggle - Manhwa and Webtoon Dataset](https://www.kaggle.com/datasets/victorsoeiro/manga-manhwa-and-manhua-dataset/data)**  
+Credit to **Victor Soeiro** for compiling and sharing this dataset.
