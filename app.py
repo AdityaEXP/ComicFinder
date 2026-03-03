@@ -8,6 +8,7 @@ import os
 import dotenv
 import gdown
 
+os.makedirs("data", exist_ok=True)
 
 url = "https://drive.google.com/uc?id=1A5stE3WbJrz59A_tOLPHrqeis6WY4uH8"
 file_path = "./data/embeddings.npy"
