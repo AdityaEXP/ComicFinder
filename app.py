@@ -47,7 +47,7 @@ query = st.text_area(
 
 top_k = st.selectbox(
     "📌 Number of recommendations",
-    options=[3, 5, 10, 15, 20],
+    options=[3, 5, 10, 15, 20, 50],
     index=2
 )
 
