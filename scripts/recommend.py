@@ -1,25 +1,37 @@
 import numpy as np
 import pandas as pd
 import json
-from openai import OpenAI
 import os
 from dotenv import load_dotenv
+from openai import OpenAI
 from sklearn.metrics.pairwise import cosine_similarity
 
+# =========================
+# Setup
+# =========================
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPEN_API_KEY"))
 
-# Load dataset
 df = pd.read_csv("./data/core_dataset_with_index.csv")
+df["tags_list"] = df["tags"].apply(
+    lambda x: [t["name"] for t in eval(x)] if pd.notna(x) else []
+)
 
-# Load embeddings
 embeddings = np.load("./data/embeddings.npy")
 
-# Load clustered tags
 with open("./data/tags.json", "r", encoding="utf-8") as f:
     CLUSTERS = json.load(f)
 
+# Build tag -> cluster map
+tag_to_cluster = {}
+for cluster_name, tag_list in CLUSTERS.items():
+    for tag in tag_list:
+        tag_to_cluster[tag.lower()] = cluster_name
+
+# =========================
+# Config
+# =========================
 
 HIGH_PRIORITY = {
     "Fantasy Core",
@@ -40,15 +52,15 @@ MEDIUM_PRIORITY = {
     "Slice of Life & Healing"
 }
 
-# Build tag -> cluster map
-tag_to_cluster = {}
-for cluster_name, tag_list in CLUSTERS.items():
-    for tag in tag_list:
-        tag_to_cluster[tag.lower()] = cluster_name
+STRONG_NEGATIVE_KEYWORDS = {"harem", "love triangle"}
 
+# =========================
+# Utilities
+# =========================
 
 def normalize(text):
     return str(text).lower().strip()
+
 
 def get_query_embedding(query):
     response = client.embeddings.create(
@@ -57,85 +69,159 @@ def get_query_embedding(query):
     )
     return np.array(response.data[0].embedding, dtype=np.float32)
 
-def compute_tag_overlap_score(query, candidate_tags):
+
+def get_query_insights(query):
+    available_tags = ", ".join(tag_to_cluster.keys())
+
+    prompt = f"""
+User Query:
+{query}
+
+Available Tags:
+[{available_tags}]
+
+Return JSON:
+{{
+  "positive_tags": [],
+  "negative_tags": []
+}}
+
+Rules:
+- Only choose exact strings from Available Tags.
+- Do not invent new tags.
+- If none apply, return empty lists.
+"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "Extract structured tag intent."},
+            {"role": "user", "content": prompt}
+        ],
+        response_format={"type": "json_object"},
+        temperature=0
+    )
+
+    return json.loads(response.choices[0].message.content)
+
+
+# =========================
+# Scoring Functions
+# =========================
+
+def compute_cluster_tag_score(query, candidate_tags):
     query_words = set(normalize(query).split())
-    
-    total_score = 0
-    match_count = 0
+    total = 0
+    count = 0
 
     for tag in candidate_tags:
         tag_norm = normalize(tag)
         tag_words = set(tag_norm.split())
-
         overlap = tag_words & query_words
-        
-        if overlap:
-            cluster = tag_to_cluster.get(tag_norm)
 
-            # Base weight from cluster priority
-            if cluster in HIGH_PRIORITY:
-                base_weight = 1.0
-            elif cluster in MEDIUM_PRIORITY:
-                base_weight = 0.5
-            else:
-                continue  # ignore low-priority clusters
+        if not overlap:
+            continue
 
-            # Partial match strength
-            match_ratio = len(overlap) / len(tag_words)
+        cluster = tag_to_cluster.get(tag_norm)
+        if cluster in HIGH_PRIORITY:
+            base = 1.0
+        elif cluster in MEDIUM_PRIORITY:
+            base = 0.5
+        else:
+            continue
 
-            total_score += base_weight * match_ratio
-            match_count += 1
+        total += base * (len(overlap) / len(tag_words))
+        count += 1
 
-    if match_count == 0:
-        return 0.0
+    return total / count if count else 0.0
 
-    # Normalize by number of matched tags
-    normalized_score = total_score / match_count
 
-    return normalized_score
+def compute_intent_score(candidate_tags, positive_tags, negative_tags):
+    candidate_norm = {normalize(t) for t in candidate_tags}
+    positive_norm = {normalize(t) for t in positive_tags}
+    negative_norm = {normalize(t) for t in negative_tags}
 
-df["tags_list"] = df["tags"].apply(lambda x: [t["name"] for t in eval(x)] if pd.notna(x) else [])
+    score = 0
+    score += len(candidate_norm & positive_norm)
+    score -= len(candidate_norm & negative_norm)
 
+    return score
+
+
+def strong_negative_hit(row, negative_tags):
+    title = normalize(row.get("title_english") or row.get("title_romaji"))
+    description = normalize(row.get("description"))
+
+    negative_norm = {normalize(t) for t in negative_tags}
+
+    # Tag-based
+    if negative_norm & {normalize(t) for t in row["tags_list"]}:
+        return True
+
+    # Keyword-based
+    for keyword in STRONG_NEGATIVE_KEYWORDS:
+        if keyword in title or keyword in description:
+            return True
+
+    # Genre-based (if Romance and user said NOT romance)
+    if "romance" in negative_norm:
+        genres = normalize(str(row.get("genres", "")))
+        if "romance" in genres:
+            return True
+
+    return False
+
+
+# =========================
+# Search
+# =========================
 
 def search(query, top_k=10):
-    print(f"\n🔎 Searching for: {query}\n")
 
-    # Step 1 — Query embedding
+    print(f"\nSearching for: {query}\n")
+
+    insights = get_query_insights(query)
+    positive_tags = insights.get("positive_tags", [])
+    negative_tags = insights.get("negative_tags", [])
+
     query_vec = get_query_embedding(query)
+    cosine_scores = cosine_similarity([query_vec], embeddings).flatten()
 
-    # Step 2 — Cosine similarity with all entries
-    cosine_scores = cosine_similarity(
-        [query_vec], embeddings
-    ).flatten()
+    top_idx = np.argsort(cosine_scores)[-300:][::-1]
+    candidates = df.iloc[top_idx].copy()
+    candidates["cosine"] = cosine_scores[top_idx]
 
-    # Step 3 — Take top 300 candidates
-    top_300_idx = np.argsort(cosine_scores)[-300:][::-1]
-
-    candidates = df.iloc[top_300_idx].copy()
-    candidates["cosine"] = cosine_scores[top_300_idx]
-
-    # Step 4 — Cluster-aware re-ranking
-    tag_scores = []
-    for _, row in candidates.iterrows():
-        tag_score = compute_tag_overlap_score(query, row["tags_list"])
-        tag_scores.append(tag_score)
-
-    candidates["tag_score"] = tag_scores
-
-    # Normalize tag score
-    if candidates["tag_score"].max() > 0:
-        candidates["tag_score"] = candidates["tag_score"] / candidates["tag_score"].max()
-
-    # Final score
-    candidates["final_score"] = (
-        0.75 * candidates["cosine"] +
-        0.25 * candidates["tag_score"]
+    # Compute structured scores
+    candidates["tag_score"] = candidates["tags_list"].apply(
+        lambda tags: compute_cluster_tag_score(query, tags)
     )
 
-    # Sort final results
+    candidates["intent_score"] = candidates["tags_list"].apply(
+        lambda tags: compute_intent_score(tags, positive_tags, negative_tags)
+    )
+
+    # Normalize structured components
+    if candidates["tag_score"].max() > 0:
+        candidates["tag_score"] /= candidates["tag_score"].max()
+
+    if candidates["intent_score"].abs().max() > 0:
+        candidates["intent_score"] /= candidates["intent_score"].abs().max()
+
+    # Base score
+    candidates["final_score"] = (
+        0.60 * candidates["cosine"] +
+        0.20 * candidates["tag_score"] +
+        0.20 * candidates["intent_score"]
+    )
+
+    # Strong negative penalty (multiplicative)
+    for idx, row in candidates.iterrows():
+        if strong_negative_hit(row, negative_tags):
+            candidates.at[idx, "final_score"] *= 0.65
+
     results = candidates.sort_values("final_score", ascending=False).head(top_k)
 
-    # Display
+    # Output
     for i, (_, row) in enumerate(results.iterrows(), 1):
         title = row["title_english"] if pd.notna(row["title_english"]) else row["title_romaji"]
         print(f"{i}. {title} ({row['year']})")
@@ -143,9 +229,3 @@ def search(query, top_k=10):
         print()
 
     return results
-
-# -----------------------------
-# 5️⃣ Example Usage
-# -----------------------------
-if __name__ == "__main__":
-    search("query")

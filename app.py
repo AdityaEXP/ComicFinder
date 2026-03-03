@@ -38,7 +38,7 @@ try:
 except:
     pass
 
-st.title("🎯 Comic Recommender (Hybrid Search)")
+st.title("🎯 Comic Recommender (Hybrid Search + Intent Parser)")
 
 query = st.text_area(
     "📝 Enter description",
